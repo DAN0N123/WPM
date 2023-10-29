@@ -1,42 +1,35 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-import openai
+import random
 
-openai.api_key = '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'
-print(f'openai.api_key : {openai.api_key}')
+# Define lists of words for different parts of speech
+subjects = ["cat", "dog", "friend", "sun", "bird", "car", "mailman", "buddy", "entrepreneur"]
+verbs = ["jumps", "runs", "sings", "sleeps", "eats", "delivered", "bought", "told"]
+adjectives = ["A quick", "The lazy", "The happy", "A bright", "The friendly", "A witty", "An instinctive", "His own"]
+objects = ["the ball", "a book", "the sky", "a rainbow", "a sandwich", "an apple", "the program"]
 
+# Initialize an empty text
+text = ""
 
-def openAIQuery(query):
-    response = openai.Completion.create(
-      engine="davinci-instruct-beta-v3",
-      prompt=query,
-      temperature=0.8,
-      max_tokens=200,
-      top_p=1,
-      frequency_penalty=0,
-      presence_penalty=0)
-
-    if 'choices' in response:
-        if len(response['choices']) > 0:
-            answer = response['choices'][0]['text']
-        else:
-            answer = 'Opps sorry, you beat the AI this time'
+# Generate a random 70-word text
+word_count = 0
+while word_count < 70:
+    subject = random.choice(subjects)
+    verb = random.choice(verbs)
+    adjective = random.choice(adjectives)
+    object_ = random.choice(objects)
+    sentence = f"{adjective} {subject} {verb} {object_}. "
+    
+    sentence_word_count = len(sentence.split())
+    if word_count + sentence_word_count <= 70:
+        text += sentence
+        word_count += sentence_word_count
     else:
-        answer = 'Opps sorry, you beat the AI this time'
+        break
 
-    return answer
+# Print the generated text
+print(text)
 
 
-if __name__ == '__main__':
-    if not openai.api_key:
-        print(f'api_key is not set')
-        exit(0)
-        
-    query = 'Generate a 30 character english sentence: '
-    try:
-        response = openAIQuery(query)
-        print(f'Response : {response}')
-    except Exception as e:
-        print(f'Exception : {str(e)}')
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
