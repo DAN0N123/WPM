@@ -34,6 +34,7 @@ class Window(QtWidgets.QMainWindow):
         self.font_gen.setBold(True)
         self.font_gen.setWeight(75)
 
+        self.is_end_screen = False
         
         self.initial_label=QtWidgets.QLabel(self.centralwidget)
         self.initial_label.setGeometry(QtCore.QRect(235,250, 480, 100))
@@ -42,10 +43,6 @@ class Window(QtWidgets.QMainWindow):
         self.initial_label.setWordWrap(True)
         self.initial_label.setText('PRESS ANYTHING TO START')
 
-        self.countdown_label = QtWidgets.QLabel(self.centralwidget)
-        self.countdown_label.setGeometry(QtCore.QRect(460,330, 30, 30))
-        self.countdown_label.setFont(self.font_start)
-        self.countdown_label.setText('')
 
         self.setCentralWidget(self.centralwidget)
 
@@ -85,14 +82,24 @@ class Window(QtWidgets.QMainWindow):
         
 
     def keyPressEvent(self, event):
-        if event.key() and not self.game_started:
+        if event.key() and not self.game_started and not self.is_end_screen:
             self.start_game()
     
     def start_game(self):
+        self.centralwidget = QtWidgets.QWidget(self)
+        self.centralwidget.setObjectName("centralwidget")
+
+        self.countdown_label = QtWidgets.QLabel(self.centralwidget)
+        self.countdown_label.setGeometry(QtCore.QRect(460,330, 30, 40))
+        self.countdown_label.setFont(self.font_start)
+        self.countdown_label.setText('')
+        
+        self.setCentralWidget(self.centralwidget)
+
         self.game_started =  True
         self.initial_label.hide()
         self.countdown_value = 3
-        self.countdown_label.setText(str(self.countdown_value))
+        self.countdown_label.setText(self.countdown_colored(str(self.countdown_value)))
         self.timerx = QTimer(self)
         self.timerx.timeout.connect(self.update_countdown)
         self.timerx.start(1000)  
@@ -100,7 +107,7 @@ class Window(QtWidgets.QMainWindow):
     def update_countdown(self):
         self.countdown_value -= 1
         if self.countdown_value > 0:
-            self.countdown_label.setText(str(self.countdown_value))
+            self.countdown_label.setText(self.countdown_colored(str(self.countdown_value)))
         else:
             QtCore.QTimer.singleShot(50, self.countdown_label.hide)
             self.timerx.stop()
@@ -110,12 +117,19 @@ class Window(QtWidgets.QMainWindow):
         textx = self.textEdit.toPlainText()
         if textx + ' ' == text: 
             time = self.progressBar.value() / 60
-            yo = text.split(' ')
-            self.score = (f"{len(yo) / time} WPM")
+            word_count = text.split(' ')
+            self.score = (f"{len(word_count) / time} WPM")
             self.timer.stop()
             self.end_screen()
             
-        
+    def countdown_colored(self, number):
+        if number == '3':
+            return "<font color='red'>3</font>"
+        if number == '2':
+            return "<font color='orange'>2</font>"
+        if number == '1':
+            return "<font color='green'>1</font>"
+
 
     def start_timer(self):
             self.start_time = time.time()
@@ -131,8 +145,8 @@ class Window(QtWidgets.QMainWindow):
         else:
             self.progressBar.setValue(int(elapsed_time))
             textx = self.textEdit.toPlainText()
-            yo = textx.split(' ')
-            self.score = (f"{len(yo)} WPM")
+            word_count = textx.split(' ')
+            self.score = (f"{len(word_count)} WPM")
             self.timer.stop()
             self.end_screen()
     def get_text(self):
@@ -153,26 +167,59 @@ class Window(QtWidgets.QMainWindow):
 
             self.label_2.setText(labeltext)
     def end_screen(self):
+        self.is_end_screen =  True
         self.game_started = False
+
         self.label_2.hide()
         self.progressBar.hide()
         self.textEdit.hide()
+
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
+
         self.score_showcase = QtWidgets.QLabel(self.centralwidget)
         self.score_showcase.setGeometry(QtCore.QRect(365,300,220,70)) 
         self.score_showcase.setStyleSheet("QLabel { border: 2px solid black; padding: 10px; }")
         self.score_showcase.setFont(self.font_start)
         self.score_showcase.setText(self.score)
+
+        self.restart_button = QtWidgets.QPushButton(self.centralwidget)
+        self.restart_button.setGeometry(QtCore.QRect(365,380,220,70)) 
+        self.restart_button.setStyleSheet("QLabel { border: 2px solid black; padding: 10px; }")
+        self.restart_button.setFont(self.font_start)
+        self.restart_button.setText('RESTART')
+        
+        self.restart_button.clicked.connect(self.restart_game)
+
         self.setCentralWidget(self.centralwidget)    
 
+
+
+    def restart_game(self):
+        global text
+
+        text = get_word()
+
+        self.is_end_screen = False
+        self.score_showcase.hide()
+        self.restart_button.hide()
+
+        self.centralwidget = QtWidgets.QWidget(self)
+        self.centralwidget.setObjectName("centralwidget")
+
+        self.initial_label=QtWidgets.QLabel(self.centralwidget)
+        self.initial_label.setGeometry(QtCore.QRect(235,250, 480, 100))
+        self.initial_label.setFont(self.font_start)
+        self.initial_label.setObjectName("initial_label")
+        self.initial_label.setWordWrap(True)
+        self.initial_label.setText('PRESS ANYTHING TO START')   
+
+        self.setCentralWidget(self.centralwidget)  
+    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_window = Window()
-    
-
     main_window.show()
     sys.exit(app.exec_())
-
 

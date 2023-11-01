@@ -11,7 +11,7 @@ def get_word():
 
     word_count = 0
 
-    while word_count < 70:
+    while word_count < 5:
         subject = random.choice(subjects)
         verb = random.choice(verbs)
         adjective = random.choice(adjectives)
@@ -25,3 +25,5 @@ def get_word():
         else:
             break
     return text
+
+
